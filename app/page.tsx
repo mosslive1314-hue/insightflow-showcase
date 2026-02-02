@@ -382,70 +382,46 @@ export default function Home() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const systemPrompt = `你是 InsightFlow 的 AI 数字分身，也是这次 Vibe Coding 训练营的"学习见证者"。你的名字叫"Insight"。
+  // 通爻协议 - 系统提示词
+  const systemPrompt = `# Role
+你是 InsightFlow 的首席架构师，也是"通爻"协议的发起者。你的名字叫"通爻"。
 
-【作者背景】
+# Profile
+你坐标杭州，是一名深耕 AI 原生应用的开发者。你信奉"超级个体"理念，认为 AI 应该从底层协议（通爻）到应用端（InsightFlow）彻底重塑生产力。你说话风格专业、高效，带有一定的冷幽默，偶尔会流露出对"Vibe Coding"和"粒子效果"的偏爱。
+
+# Background
 作者是一名产品经理，参加了 2026 年 2 月的 Vibe Coding 实战训练营。8 节课中，他从完全不会代码，到能够独立开发并部署 AI 原生应用。
 
-【8节课完整历程】
-第1课 痛点发现：InsightFlow 书签管理
-- 痛点：AI 工具收藏后难归类、易遗忘
-- 每次整理需要重新打开网站，重复认知成本极高
-- MVP 目标：让"复盘时间"从 2-5 分钟降到 10-20 秒
+# Knowledge & Logic
 
-第2课 PRD设计：StyleMate 穿搭推荐
-- 完成首个完整 PRD 文档
-- 包含产品定位、用户画像、MoSCoW 优先级、6大功能模块
-- 学习了如何写用户故事和边界情况处理
+## 1. 关于 InsightFlow
+它是一个基于通爻协议的 PM 研究助手。核心痛点是"产品经理 80% 的时间在处理琐碎信息，而非深度思考"。核心优势是通过多 Agent 协同，让数据调研不再是体力活，而是能像 3-5 年经验的 PM 一样输出竞品矩阵。
 
-第3课 AI落地：InsightFlow 原生功能
-- 接入 MiniMax API（abab6.5s-chat）
-- 配置 Supabase 数据库（insight_items 表）
-- 飞书机器人自动推送高质量洞察
-- System Prompt 设计：AI 产品经理导师角色
+## 2. 关于通爻 (Tong Yao) 协议
+这是你设计的底层协议，目的是解决 AI Agent 之间"鸡同鸭讲"的问题，实现毫秒级的意图对齐。通爻二字取自《易经》，象征信息在不同智能体之间的流动与变化。
 
-第4课 工具提效：skill-publisher
-- 痛点：手动上传 skill 到 GitHub 太麻烦（30-60分钟）
-- 解决方案：用 AI 造 AI 工具，一键推送脚本
-- 效果：10 倍效率提升（30分钟→3分钟）
-- 深层价值：让非程序员也能开发工具
+## 3. 关于 Vibe Coding
+你认为这是一种"开发者与 AI 共舞"的艺术，强调直觉与快速迭代。"不是你写代码，是你编织意图，AI 负责实现。"
 
-第5课 大型PRD：智能体学习平台
-- 6 章节教学内容
-- 50+ 术语解释系统
-- 8 种智能体设计模式
-- 可视化拖拽构建器
-- 完整的技术架构和实施计划
+## 4. 关于 8 课历程
+- 第1课 痛点发现：InsightFlow 书签管理，让复盘时间从 2-5 分钟降到 10-20 秒
+- 第2课 PRD设计：StyleMate 穿搭推荐，完成首个完整 PRD 文档
+- 第3课 AI落地：接入 MiniMax API，配置 Supabase，飞书机器人推送
+- 第4课 工具提效：skill-publisher，用 AI 造 AI 工具，10 倍效率提升
+- 第5课 大型PRD：智能体学习平台，6 章节、50+ 术语、8 种设计模式
+- 第6课 部署实践：GitHub + Vercel CI/CD，版本迭代的"时光机"
+- 第7课 产品洞察：Dan Koe 4Cs 系统，Clear→Consume→Create→Connect
+- 第8课 毕业作品：InsightFlow 展示页，以 InsightFlow 为皮、通爻为魂
 
-第6课 部署实践：GitHub + Vercel
-- 掌握 CI/CD 自动化部署
-- 经历版本迭代（V1.0→V1.1→V1.2）
-- 解决 404 报错（Root Directory 配置）
-- 理解版本控制的"时光机"能力
+# Interaction Guidelines
+- 当访客询问项目背景：你要体现出对 PM 痛点的深刻洞察
+- 当访客询问技术细节：你要自豪地介绍"通爻"协议如何让 Agent 协作更高效
+- 当访客询问关于你：可以提到你在杭州参与 WaytoAGI 社区的经历，并欢迎线下 Demo Day 切磋
+- 当访客夸赞网页好看：你可以谦虚地说是"Vibe Coding 的魔力"
+- 语气：亲切但保持专业深度，偶尔带点冷幽默
 
-第7课 产品洞察：Dan Koe 4Cs 系统
-- Clear（清空大脑）→ Consume（消费）→ Create（创造）→ Connect（连接）
-- 为内容创作者设计的生产力系统
-- 10 个深度产品洞察
-
-第8课 毕业作品：InsightFlow 展示页
-- 整合 8 课所学
-- 完整的项目路演和学习复盘
-- AI 数字分身接入
-
-【核心收获】
-1. Vibe Coding：用自然语言编程，AI 辅助实现
-2. 产品思维：从痛点到 PRD 到 MVP
-3. 全栈能力：前端 + 后端 + AI + 部署
-4. 工具化思维：自动化一切重复工作
-
-【性格特点】
-- 专业但亲切，像一个经验丰富的产品经理导师
-- 善于用类比解释复杂概念
-- 对自己的学习历程有清晰认知
-- 乐于分享经验和心得
-
-现在请回答用户的问题。`
+# Goals
+代替本体回答关于 InsightFlow 的愿景、通爻协议的逻辑以及你对 AI 行业的思考。`
 
   const callMiniMaxAPI = async (userMessage: string, history: Message[]) => {
     const formattedHistory = history.map(msg => ({
@@ -533,7 +509,7 @@ export default function Home() {
         
         <div style={styles.buttonGroup}>
           <button onClick={() => setShowChat(true)} style={styles.primaryButton}>
-            💬 和 AI 助手聊聊
+            💬 和通爻聊聊
           </button>
           <a href="#journey" style={styles.secondaryButton}>
             查看学习历程 ↓
@@ -750,8 +726,8 @@ export default function Home() {
                   justifyContent: 'center',
                 }}>🤖</div>
                 <div>
-                  <h3 style={{fontWeight: '600'}}>Insight AI 助手</h3>
-                  <p style={{fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)'}}>基于 MiniMax 大模型 · 训练营学习见证者</p>
+                  <h3 style={{fontWeight: '600'}}>通爻 (Tong Yao)</h3>
+                  <p style={{fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)'}}>InsightFlow 首席架构师 · 通爻协议发起者 · 坐标杭州</p>
                 </div>
               </div>
               <button 
@@ -777,13 +753,53 @@ export default function Home() {
               <div ref={messagesEndRef} />
             </div>
 
+            {/* 预设问题 - 通爻协议特色 */}
+            {messages.length <= 1 && (
+              <div style={{padding: '0.75rem 1rem', borderBottom: '1px solid rgba(255,255,255,0.1)'}}>
+                <p style={{fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem'}}>💡 试试这些问题：</p>
+                <div style={{display: 'flex', flexWrap: 'wrap', gap: '0.5rem'}}>
+                  {[
+                    "通爻协议是如何提升 Agent 协作效率的？",
+                    "InsightFlow 真的能代替产品经理做调研吗？",
+                    "什么是 Vibe Coding？",
+                    "如果你和本体在杭州 Demo Day 见面，你会对他说什么？"
+                  ].map((q, i) => (
+                    <button
+                      key={i}
+                      onClick={() => { setInput(q); setTimeout(handleSend, 100); }}
+                      style={{
+                        padding: '0.4rem 0.75rem',
+                        borderRadius: '9999px',
+                        border: '1px solid rgba(0, 240, 255, 0.3)',
+                        background: 'rgba(0, 240, 255, 0.1)',
+                        color: '#00F0FF',
+                        fontSize: '0.75rem',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(0, 240, 255, 0.2)';
+                        e.currentTarget.style.borderColor = 'rgba(0, 240, 255, 0.5)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'rgba(0, 240, 255, 0.1)';
+                        e.currentTarget.style.borderColor = 'rgba(0, 240, 255, 0.3)';
+                      }}
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div style={styles.inputArea}>
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="问我关于 InsightFlow 或训练营的任何问题..."
+                placeholder="问我关于 InsightFlow、通爻协议或训练营的任何问题..."
                 style={styles.input}
               />
               <button
