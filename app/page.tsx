@@ -154,8 +154,10 @@ const styles: Record<string, React.CSSProperties> = {
   },
   cards: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+    gridTemplateColumns: 'repeat(2, 1fr)',
     gap: '1.5rem',
+    maxWidth: '800px',
+    margin: '0 auto',
   },
   card: {
     background: 'rgba(255,255,255,0.05)',
@@ -524,7 +526,7 @@ export default function Home() {
     <main style={styles.container}>
       {/* Hero Section */}
       <section style={styles.hero}>
-        <div style={styles.badge}>✨ Web Coding 训练营 · 毕业作品</div>
+        <div style={styles.badge}>✨ Vibe Coding 训练营 · 毕业作品</div>
         <h1 style={styles.title}>InsightFlow</h1>
         <p style={styles.subtitle}>
           8 周时间，从完全不会代码到独立开发 AI 原生应用<br />
@@ -679,9 +681,55 @@ export default function Home() {
       </section>
 
       {/* Footer */}
+      {/* Acknowledgments Section */}
+      <section style={{...styles.sectionAlt, paddingBottom: '3rem'}}>
+        <div style={styles.section}>
+          <h2 style={styles.sectionTitle}>致谢</h2>
+          <p style={{...styles.sectionSubtitle, maxWidth: '600px', margin: '0 auto 3rem'}}>
+            感谢这段旅程中给予我帮助和支持的每一个人
+          </p>
+          
+          {/* WaytoAGI Community */}
+          <div style={{...styles.highlightBox, textAlign: 'center', marginBottom: '3rem'}}>
+            <div style={{fontSize: '3rem', marginBottom: '1rem'}}>🌟</div>
+            <h3 style={{fontSize: '1.5rem', marginBottom: '1rem', color: '#00F0FF'}}>WaytoAGI 社区</h3>
+            <p style={{color: 'rgba(255,255,255,0.7)', lineHeight: 1.8, maxWidth: '600px', margin: '0 auto'}}>
+              "在 AI 的浪潮中，我们不是独自前行。<br />
+              感谢 WaytoAGI 社区提供的 Vibe Coding 训练营，<br />
+              让我从一个产品小白成长为能够独立开发 AI 应用的创造者。<br />
+              这里不仅有技术的传授，更有思维的觉醒。"
+            </p>
+          </div>
+          
+          {/* Teachers */}
+          <div style={styles.cards}>
+            <div style={{...styles.card, textAlign: 'center'}}>
+              <div style={{fontSize: '2.5rem', marginBottom: '0.5rem'}}>👨‍🏫</div>
+              <h3 style={styles.cardTitle}>小鱿鱼老师</h3>
+              <p style={styles.cardText}>课程设计与技术指导<br />用耐心和专业点亮初学者</p>
+            </div>
+            <div style={{...styles.card, textAlign: 'center'}}>
+              <div style={{fontSize: '2.5rem', marginBottom: '0.5rem'}}>👩‍🏫</div>
+              <h3 style={styles.cardTitle}>龙龙老师</h3>
+              <p style={styles.cardText}>实战指导与答疑<br />让复杂概念变得简单易懂</p>
+            </div>
+            <div style={{...styles.card, textAlign: 'center'}}>
+              <div style={{fontSize: '2.5rem', marginBottom: '0.5rem'}}>👨‍💻</div>
+              <h3 style={styles.cardTitle}>云舒老师</h3>
+              <p style={styles.cardText}>产品思维培养<br />从点子到产品的完整方法论</p>
+            </div>
+            <div style={{...styles.card, textAlign: 'center'}}>
+              <div style={{fontSize: '2.5rem', marginBottom: '0.5rem'}}>🤖</div>
+              <h3 style={styles.cardTitle}>Claude & Kimi</h3>
+              <p style={styles.cardText}>AI 编程伙伴<br />24小时随时待命的 mentor</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <footer style={styles.footer}>
         <p style={{fontSize: '1.25rem', marginBottom: '0.5rem'}}>InsightFlow</p>
-        <p>Web Coding 实战训练营 · 2026年2月</p>
+        <p>Vibe Coding 实战训练营 · 2026年2月</p>
         <p style={{fontSize: '0.875rem', marginTop: '1rem', opacity: 0.6}}>
           Made with 💙 and AI · 从 0 到 1 的完整产品之旅
         </p>
@@ -737,7 +785,7 @@ export default function Home() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="问我关于训练营的任何问题..."
+                placeholder="问我关于 InsightFlow 或训练营的任何问题..."
                 style={styles.input}
               />
               <button
