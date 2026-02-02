@@ -369,7 +369,7 @@ export default function Home() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: '你好！我是 InsightFlow AI 助手，也是这次 Web Coding 训练营的学习见证者。\n\n你可以问我关于：\n• 这次训练营我学到了什么？\n• InsightFlow 是怎么从点子到产品的？\n• 8 节课中最有收获的是哪一节？\n• Vibe Coding 给我带来了什么改变？\n\n有什么想了解的吗？',
+      content: '你好！我是通爻，InsightFlow 的首席架构师，也是这次 Vibe Coding 训练营的学习见证者。\n\n你可以问我关于：\n• 通爻协议是什么？\n• InsightFlow 是怎么从点子到产品的？\n• 8 节课中最有收获的是哪一节？\n• Vibe Coding 给我带来了什么改变？\n\n有什么想了解的吗？',
       timestamp: new Date()
     }
   ])
@@ -377,10 +377,35 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false)
   const [showChat, setShowChat] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  
+  // 对话限制状态
+  const [chatStatus, setChatStatus] = useState<{
+    personalRemaining: number;
+    globalRemaining: string;
+    globalPercent: string;
+    isGlobalClosed: boolean;
+  } | null>(null)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+  
+  // 获取对话限制状态
+  useEffect(() => {
+    if (showChat) {
+      fetch('/api/chat')
+        .then(res => res.json())
+        .then(data => {
+          setChatStatus({
+            personalRemaining: data.personal.remaining,
+            globalRemaining: data.global.remaining,
+            globalPercent: data.global.percentUsed,
+            isGlobalClosed: data.global.isClosed
+          });
+        })
+        .catch(() => setChatStatus(null));
+    }
+  }, [showChat])
 
   // 通爻协议 - 系统提示词
   const systemPrompt = `# Role
@@ -736,6 +761,33 @@ export default function Home() {
               >×</button>
             </div>
 
+            {/* 状态提示条 */}
+            {chatStatus && (
+              <div style={{
+                padding: '0.5rem 1rem',
+                background: chatStatus.isGlobalClosed 
+                  ? 'rgba(239, 68, 68, 0.2)' 
+                  : chatStatus.personalRemaining === 0 
+                    ? 'rgba(239, 68, 68, 0.2)'
+                    : 'rgba(0, 240, 255, 0.1)',
+                borderBottom: '1px solid rgba(255,255,255,0.1)',
+                fontSize: '0.75rem',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}>
+                <span style={{ 
+                  color: chatStatus.personalRemaining === 0 ? '#ef4444' : '#00F0FF',
+                  fontWeight: 500
+                }}>
+                  🎯 您还可提问 {chatStatus.personalRemaining} 次
+                </span>
+                <span style={{ color: 'rgba(255,255,255,0.5)' }}>
+                  预算剩余: {chatStatus.globalRemaining} ({100 - parseFloat(chatStatus.globalPercent)}%)
+                </span>
+              </div>
+            )}
+
             <div style={styles.messages}>
               {messages.map((message, index) => (
                 <div 
@@ -756,7 +808,9 @@ export default function Home() {
             {/* 预设问题 - 通爻协议特色 */}
             {messages.length <= 1 && (
               <div style={{padding: '0.75rem 1rem', borderBottom: '1px solid rgba(255,255,255,0.1)'}}>
-                <p style={{fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem'}}>💡 试试这些问题：</p>
+                <p style={{fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem'}}>
+                  💡 试试这些问题（每人限 {chatStatus?.personalRemaining ?? 5} 次，演示预算有限请谅解）：
+                </p>
                 <div style={{display: 'flex', flexWrap: 'wrap', gap: '0.5rem'}}>
                   {[
                     "通爻协议是如何提升 Agent 协作效率的？",
