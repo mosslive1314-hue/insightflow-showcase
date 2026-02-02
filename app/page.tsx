@@ -376,6 +376,7 @@ export default function Home() {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [showChat, setShowChat] = useState(false)
+  const [clickedPresets, setClickedPresets] = useState<Set<string>>(new Set())
   const messagesEndRef = useRef<HTMLDivElement>(null)
   
   // 对话限制状态
@@ -534,8 +535,7 @@ Vibe Coding：
         body: JSON.stringify({
           messages: [
             { role: 'system', content: systemPrompt },
-            ...formattedHistory,
-            { role: 'user', content: userMessage }
+            ...formattedHistory
           ]
         })
       })
@@ -561,40 +561,48 @@ Vibe Coding：
 
     const userMessage = input.trim()
     setInput('')
-    
+
     const newMessages = [...messages, { role: 'user' as const, content: userMessage, timestamp: new Date() }]
-    setMessages(newMessages)
-    
+
     // 检查是否是预设问题（本地缓存，不消耗 API）
     const presetAnswer = PRESET_ANSWERS[userMessage]
     if (presetAnswer) {
+      // 记录已点击的预设问题
+      setClickedPresets(prev => new Set(prev).add(userMessage))
+
+      // 更新消息列表
+      setMessages(newMessages)
+
       // 模拟一点打字延迟，体验更自然
       setIsLoading(true)
       await new Promise(resolve => setTimeout(resolve, 800))
-      
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
+
+      setMessages(prev => [...prev, {
+        role: 'assistant',
         content: presetAnswer,
         timestamp: new Date()
       }])
       setIsLoading(false)
       return
     }
-    
+
     // 自定义问题才调用 API
     setIsLoading(true)
 
+    // 先更新消息列表显示用户消息
+    setMessages(newMessages)
+
     try {
-      const assistantContent = await callMiniMaxAPI(userMessage, messages)
-      
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
+      const assistantContent = await callMiniMaxAPI(userMessage, newMessages)
+
+      setMessages(prev => [...prev, {
+        role: 'assistant',
         content: assistantContent,
         timestamp: new Date()
       }])
     } catch (error) {
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
+      setMessages(prev => [...prev, {
+        role: 'assistant',
         content: '抱歉，出错了。请检查 API Key 是否已正确配置。',
         timestamp: new Date()
       }])
@@ -865,14 +873,11 @@ Vibe Coding：
                 justifyContent: 'space-between',
                 alignItems: 'center',
               }}>
-                <span style={{ 
+                <span style={{
                   color: chatStatus.personalRemaining === 0 ? '#ef4444' : '#00F0FF',
                   fontWeight: 500
                 }}>
                   🎯 自定义问题: {chatStatus.personalRemaining}/{MAX_CUSTOM_QUESTIONS} 次
-                </span>
-                <span style={{ color: 'rgba(255,255,255,0.5)' }}>
-                  预算: {chatStatus.globalRemaining}
                 </span>
               </div>
             )}
@@ -895,46 +900,64 @@ Vibe Coding：
             </div>
 
             {/* 预设问题 - 通爻协议特色 */}
-            {messages.length <= 1 && (
-              <div style={{padding: '0.75rem 1rem', borderBottom: '1px solid rgba(255,255,255,0.1)'}}>
-                <p style={{fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem'}}>
-                  💡 推荐问题（点击免费体验，不消耗 API 额度）：
-                </p>
-                <div style={{display: 'flex', flexWrap: 'wrap', gap: '0.5rem'}}>
-                  {[
-                    "通爻协议是如何提升 Agent 协作效率的？",
-                    "InsightFlow 真的能代替产品经理做调研吗？",
-                    "什么是 Vibe Coding？",
-                    "如果你和本体在杭州 Demo Day 见面，你会对他说什么？"
-                  ].map((q, i) => (
+            <div style={{padding: '0.75rem 1rem', borderBottom: '1px solid rgba(255,255,255,0.1)'}}>
+              <p style={{fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem'}}>
+                💡 推荐问题（点击免费体验，不消耗 API 额度）：
+              </p>
+              <div style={{display: 'flex', flexWrap: 'wrap', gap: '0.5rem'}}>
+                {[
+                  "通爻协议是如何提升 Agent 协作效率的？",
+                  "InsightFlow 真的能代替产品经理做调研吗？",
+                  "什么是 Vibe Coding？",
+                  "如果你和本体在杭州 Demo Day 见面，你会对他说什么？"
+                ].map((q, i) => {
+                  const isClicked = clickedPresets.has(q)
+                  return (
                     <button
                       key={i}
-                      onClick={() => { setInput(q); setTimeout(handleSend, 100); }}
+                      onClick={() => {
+                        if (!isClicked) {
+                          setInput(q)
+                          setTimeout(handleSend, 100)
+                        }
+                      }}
+                      disabled={isClicked}
                       style={{
                         padding: '0.4rem 0.75rem',
                         borderRadius: '9999px',
-                        border: '1px solid rgba(0, 240, 255, 0.3)',
-                        background: 'rgba(0, 240, 255, 0.1)',
-                        color: '#00F0FF',
+                        border: isClicked
+                          ? '1px solid rgba(255,255,255,0.1)'
+                          : '1px solid rgba(0, 240, 255, 0.3)',
+                        background: isClicked
+                          ? 'rgba(255,255,255,0.05)'
+                          : 'rgba(0, 240, 255, 0.1)',
+                        color: isClicked
+                          ? 'rgba(255,255,255,0.3)'
+                          : '#00F0FF',
                         fontSize: '0.75rem',
-                        cursor: 'pointer',
+                        cursor: isClicked ? 'not-allowed' : 'pointer',
                         transition: 'all 0.2s',
+                        opacity: isClicked ? 0.5 : 1,
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'rgba(0, 240, 255, 0.2)';
-                        e.currentTarget.style.borderColor = 'rgba(0, 240, 255, 0.5)';
+                        if (!isClicked) {
+                          e.currentTarget.style.background = 'rgba(0, 240, 255, 0.2)'
+                          e.currentTarget.style.borderColor = 'rgba(0, 240, 255, 0.5)'
+                        }
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'rgba(0, 240, 255, 0.1)';
-                        e.currentTarget.style.borderColor = 'rgba(0, 240, 255, 0.3)';
+                        if (!isClicked) {
+                          e.currentTarget.style.background = 'rgba(0, 240, 255, 0.1)'
+                          e.currentTarget.style.borderColor = 'rgba(0, 240, 255, 0.3)'
+                        }
                       }}
                     >
-                      {q}
+                      {isClicked ? '✓ ' : ''}{q}
                     </button>
-                  ))}
-                </div>
+                  )
+                })}
               </div>
-            )}
+            </div>
 
             <div style={styles.inputArea}>
               <input
@@ -942,7 +965,7 @@ Vibe Coding：
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="输入自定义问题（消耗额度，剩余 X 次）..." 
+                placeholder="输入你想问的问题..."
                 style={styles.input}
               />
               <button
