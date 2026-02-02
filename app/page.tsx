@@ -551,7 +551,8 @@ Vibe Coding：
       return data.choices?.[0]?.message?.content || '抱歉，我现在有点混乱，能再问我一次吗？'
     } catch (error) {
       console.error('MiniMax API 错误:', error)
-      return `API 调用出错了: ${error.message}`
+      const errorMessage = error instanceof Error ? error.message : '未知错误'
+      return `API 调用出错了: ${errorMessage}`
     }
   }
 
