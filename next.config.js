@@ -1,12 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
-  distDir: 'dist',
-  assetPrefix: '.',
+  // 删除 output: 'export'，使用 SSR 模式
   images: {
     unoptimized: true,
   },
-  trailingSlash: true,
 }
 
 module.exports = nextConfig

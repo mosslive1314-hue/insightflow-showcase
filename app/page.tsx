@@ -382,13 +382,10 @@ export default function Home() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const callMiniMaxAPI = async (userMessage: string, history: Message[]) => {
-    const apiKey = process.env.NEXT_PUBLIC_MINIMAX_API_KEY || ''
-    
-    const systemPrompt = `你是 InsightFlow 的 AI 数字分身，也是这次 Web Coding 训练营的"学习见证者"。你的名字叫"Insight"。
+  const systemPrompt = `你是 InsightFlow 的 AI 数字分身，也是这次 Vibe Coding 训练营的"学习见证者"。你的名字叫"Insight"。
 
 【作者背景】
-作者是一名产品经理，参加了 2026 年 2 月的 Web Coding 实战训练营。8 节课中，他从完全不会代码，到能够独立开发并部署 AI 原生应用。
+作者是一名产品经理，参加了 2026 年 2 月的 Vibe Coding 实战训练营。8 节课中，他从完全不会代码，到能够独立开发并部署 AI 原生应用。
 
 【8节课完整历程】
 第1课 痛点发现：InsightFlow 书签管理
@@ -450,39 +447,40 @@ export default function Home() {
 
 现在请回答用户的问题。`
 
+  const callMiniMaxAPI = async (userMessage: string, history: Message[]) => {
     const formattedHistory = history.map(msg => ({
       role: msg.role === 'user' ? 'user' : 'assistant',
       content: msg.content
     }))
 
     try {
-      const response = await fetch('https://api.minimaxi.chat/v1/text/chatcompletion_v2', {
+      // 使用服务端 API 路由（避免 CORS 和暴露 API Key）
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-          model: 'abab6.5-chat',
           messages: [
             { role: 'system', content: systemPrompt },
             ...formattedHistory,
             { role: 'user', content: userMessage }
-          ],
-          temperature: 0.7,
-          max_tokens: 2000
+          ]
         })
       })
 
       if (!response.ok) {
+        const errorText = await response.text()
+        console.error('API Error Response:', errorText)
         throw new Error(`API 错误: ${response.status}`)
       }
 
       const data = await response.json()
+      console.log('API Response:', data)
       return data.choices?.[0]?.message?.content || '抱歉，我现在有点混乱，能再问我一次吗？'
     } catch (error) {
       console.error('MiniMax API 错误:', error)
-      return 'API 调用出错了，请检查网络连接或 API Key 是否正确设置。'
+      return `API 调用出错了: ${error.message}`
     }
   }
 
