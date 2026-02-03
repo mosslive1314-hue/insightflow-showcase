@@ -547,8 +547,22 @@ Vibe Coding：
       }
 
       const data = await response.json()
-      console.log('API Response:', data)
-      return data.choices?.[0]?.message?.content || '抱歉，我现在有点混乱，能再问我一次吗？'
+      console.log('=== 前端收到的 API 响应 ===')
+      console.log('完整响应数据:', JSON.stringify(data, null, 2))
+      console.log('choices 存在?', !!data.choices)
+      console.log('choices[0] 存在?', !!data.choices?.[0])
+      console.log('message 存在?', !!data.choices?.[0]?.message)
+      console.log('content 存在?', !!data.choices?.[0]?.message?.content)
+      console.log('content 值:', data.choices?.[0]?.message?.content)
+      console.log('============================')
+
+      // 检查响应格式
+      if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+        console.error('❌ 响应格式错误: 缺少必要的字段')
+        return '抱歉，API 返回的数据格式不对。请查看控制台日志。'
+      }
+
+      return data.choices[0].message.content || '抱歉，我现在有点混乱，能再问我一次吗？'
     } catch (error) {
       console.error('MiniMax API 错误:', error)
       const errorMessage = error instanceof Error ? error.message : '未知错误'
