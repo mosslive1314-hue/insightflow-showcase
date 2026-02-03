@@ -872,10 +872,10 @@ Vibe Coding：
             <div style={styles.modalHeader}>
               <div style={{display: 'flex', alignItems: 'center', gap: '0.75rem'}}>
                 <div style={{
-                  width: '40px', 
-                  height: '40px', 
-                  borderRadius: '10px', 
-                  background: 'rgba(0, 240, 255, 0.2)', 
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '10px',
+                  background: 'rgba(0, 240, 255, 0.2)',
                   color: '#00F0FF',
                   display: 'flex',
                   alignItems: 'center',
@@ -883,7 +883,10 @@ Vibe Coding：
                 }}>🤖</div>
                 <div>
                   <h3 style={{fontWeight: '600'}}>通爻 (Tong Yao)</h3>
-                  <p style={{fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)'}}>InsightFlow 首席架构师 · 通爻协议发起者 · 坐标杭州</p>
+                  <p style={{fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)'}}>
+                    InsightFlow 首席架构师 · 通爻协议发起者 · 坐标杭州
+                    {' '}<span style={{background: 'rgba(0, 240, 255, 0.2)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem'}}>v3.0</span>
+                  </p>
                 </div>
               </div>
               <button 
