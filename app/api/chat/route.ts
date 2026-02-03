@@ -88,7 +88,16 @@ export async function POST(req: NextRequest) {
   try {
     const { messages } = await req.json();
     const apiKey = process.env.MINIMAX_API_KEY || '';
-    
+
+    // ============ 调试日志 ============
+    console.log('=== API 调用调试信息 ===');
+    console.log('1. API Key 状态:', apiKey ? '存在' : '不存在');
+    console.log('2. API Key 长度:', apiKey.length);
+    console.log('3. API Key 前缀:', apiKey.substring(0, 10) + '...');
+    console.log('4. API Key 后缀:', '...' + apiKey.substring(apiKey.length - 10));
+    console.log('5. 是否包含空格:', apiKey.includes(' ') || apiKey.includes('\n') || apiKey.includes('\t'));
+    console.log('=======================');
+
     if (!apiKey) {
       return NextResponse.json({
         choices: [{
@@ -115,7 +124,10 @@ export async function POST(req: NextRequest) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('MiniMax API Error:', response.status, errorText);
+      console.error('=== MiniMax API 错误响应 ===');
+      console.error('状态码:', response.status);
+      console.error('错误详情:', errorText);
+      console.error('============================');
       return NextResponse.json({
         choices: [{
           message: {
@@ -126,6 +138,35 @@ export async function POST(req: NextRequest) {
     }
 
     const data = await response.json();
+    console.log('=== MiniMax API 成功响应 ===');
+    console.log('响应数据:', JSON.stringify(data, null, 2));
+    console.log('=============================');
+
+    // 检查 MiniMax API 特定的错误代码
+    if (data.base_resp && data.base_resp.status_code !== 0) {
+      console.error('=== MiniMax 业务逻辑错误 ===');
+      console.error('错误代码:', data.base_resp.status_code);
+      console.error('错误信息:', data.base_resp.status_msg);
+      console.error('============================');
+
+      // 针对不同错误代码返回友好提示
+      const errorMessages: Record<number, string> = {
+        2049: '🔑 API Key 无效或已过期。请在 Vercel 环境变量中检查 MINIMAX_API_KEY',
+        1000: '服务器内部错误',
+        1001: '参数错误',
+        1002: '请求频率过高',
+      };
+
+      const errorMsg = errorMessages[data.base_resp.status_code] || `API 错误: ${data.base_resp.status_msg}`;
+
+      return NextResponse.json({
+        choices: [{
+          message: {
+            content: errorMsg
+          }
+        }]
+      }, { status: 400 });
+    }
     
     // 更新统计
     const actualTokens = data.usage?.total_tokens || AVG_TOKENS_PER_CALL;
