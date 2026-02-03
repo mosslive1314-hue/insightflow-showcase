@@ -115,7 +115,7 @@ export async function POST(req: NextRequest) {
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'abab6.5s-chat',
+        model: 'M2-her',  // 使用 M2 模型（Coding Plan 支持）
         messages: messages,
         temperature: 0.7,
         max_tokens: MAX_TOKENS_PER_REQUEST
