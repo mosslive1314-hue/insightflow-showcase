@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 // ============ 配置参数 ============
 // 自定义问题限制：每人可提问次数（预设问题不计入）
-const MAX_CUSTOM_QUESTIONS = 3;
+const MAX_CUSTOM_QUESTIONS = 100;  // 提高到100次，避免过早触发限制
 
 // 全局金额限制：单位元，达到后关闭服务
 const GLOBAL_BUDGET_LIMIT = 30;
