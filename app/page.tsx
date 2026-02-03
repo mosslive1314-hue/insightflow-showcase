@@ -540,48 +540,53 @@ Vibe Coding：
         })
       })
 
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error('=== API HTTP 错误 ===')
-        console.error('状态码:', response.status)
-        console.error('错误内容:', errorText)
+      // 获取响应文本（无论状态码是什么）
+      const responseText = await response.text()
+      console.log('========== API 调试日志 ==========')
+      console.log('HTTP 状态码:', response.status)
+      console.log('HTTP 状态文本:', response.statusText)
+      console.log('响应类型:', typeof responseText)
+      console.log('原始响应:', responseText.substring(0, 500))
 
-        // 尝试解析错误响应（可能是 400 状态码但 body 包含错误消息）
-        try {
-          const errorData = JSON.parse(errorText)
-          if (errorData.choices && errorData.choices[0] && errorData.choices[0].message) {
-            console.log('从错误响应中提取消息:', errorData.choices[0].message.content)
-            return errorData.choices[0].message.content
-          }
-        } catch (e) {
-          console.log('无法解析错误响应为 JSON')
+      try {
+        const data = JSON.parse(responseText)
+        console.log('解析后的 JSON:', JSON.stringify(data, null, 2))
+
+        // 尝试从 choices 中获取内容
+        if (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) {
+          console.log('✅ 成功提取内容:', data.choices[0].message.content.substring(0, 50))
+          console.log('====================================')
+          return data.choices[0].message.content
         }
 
-        console.log('====================')
-        throw new Error(`API 错误: ${response.status}`)
+        // 如果没有 choices，检查是否有 base_resp
+        if (data.base_resp) {
+          console.log('⚠️ 检测到 base_resp 错误')
+          console.log('错误代码:', data.base_resp.status_code)
+          console.log('错误信息:', data.base_resp.status_msg)
+
+          // 返回友好的错误消息
+          if (data.base_resp.status_code === 2049) {
+            return '🔑 API Key 错误：请在 Vercel 环境变量中检查 MINIMAX_API_KEY 是否正确设置。'
+          }
+          return `API 错误 (${data.base_resp.status_code}): ${data.base_resp.status_msg}`
+        }
+
+        console.log('❌ 响应格式无法识别')
+        return `无法解析 API 响应。原始数据: ${JSON.stringify(data).substring(0, 100)}...`
+
+      } catch (parseError) {
+        console.log('❌ JSON 解析失败:', parseError)
+        console.log('响应内容:', responseText)
+        return `API 返回了非 JSON 数据: ${responseText.substring(0, 100)}...`
       }
 
-      const data = await response.json()
-      console.log('=== 前端收到的 API 响应 ===')
-      console.log('完整响应数据:', JSON.stringify(data, null, 2))
-      console.log('choices 存在?', !!data.choices)
-      console.log('choices[0] 存在?', !!data.choices?.[0])
-      console.log('message 存在?', !!data.choices?.[0]?.message)
-      console.log('content 存在?', !!data.choices?.[0]?.message?.content)
-      console.log('content 值:', data.choices?.[0]?.message?.content)
-      console.log('============================')
-
-      // 检查响应格式
-      if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-        console.error('❌ 响应格式错误: 缺少必要的字段')
-        return '抱歉，API 返回的数据格式不对。请查看控制台日志。'
-      }
-
-      return data.choices[0].message.content || '抱歉，我现在有点混乱，能再问我一次吗？'
     } catch (error) {
-      console.error('MiniMax API 错误:', error)
+      console.error('========== 网络错误 ==========')
+      console.error('错误详情:', error)
+      console.error('==============================')
       const errorMessage = error instanceof Error ? error.message : '未知错误'
-      return `API 调用出错了: ${errorMessage}`
+      return `网络请求失败: ${errorMessage}`
     }
   }
 
