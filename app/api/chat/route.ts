@@ -2,13 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 
 // ============ 配置参数 ============
 // 自定义问题限制：每人可提问次数（预设问题不计入）
-const MAX_CUSTOM_QUESTIONS = 100;  // 提高到100次，避免过早触发限制
+const MAX_CUSTOM_QUESTIONS = 5;  // 降低到5次，节省成本
 
 // 全局金额限制：单位元，达到后关闭服务
-const GLOBAL_BUDGET_LIMIT = 30;
+const GLOBAL_BUDGET_LIMIT = 5;  // 降低到5元，快速止损
 
 // 单次调用最大 token 数
-const MAX_TOKENS_PER_REQUEST = 500;
+const MAX_TOKENS_PER_REQUEST = 300;  // 从500降低到300，减少单次成本
 
 // Token 单价估算（abab6.5s-chat）
 const COST_PER_1K_TOKENS = 0.002;
@@ -17,6 +17,10 @@ const COST_PER_CALL_ESTIMATE = (AVG_TOKENS_PER_CALL / 1000) * COST_PER_1K_TOKENS
 
 // 截止日期后自动关闭
 const DEADLINE = new Date('2026-02-15T23:59:59+08:00').getTime();
+
+// ============ 服务控制 ============
+// 环境变量控制：设置 SERVICE_CLOSED=true 可立即关闭服务
+const SERVICE_CLOSED = process.env.SERVICE_CLOSED === 'true';
 
 // ============ 内存存储 ============
 interface IPRecord {
@@ -48,7 +52,18 @@ function getRemainingBudget(): number {
 export async function POST(req: NextRequest) {
   const ip = getClientIP(req);
   const now = Date.now();
-  
+
+  // 0. 检查手动关闭开关（优先级最高）
+  if (SERVICE_CLOSED) {
+    return NextResponse.json({
+      choices: [{
+        message: {
+          content: '🔒 AI 对话功能已暂时关闭。作业展示结束后，感谢大家体验 InsightFlow！'
+        }
+      }]
+    });
+  }
+
   // 1. 检查截止日期
   if (now > DEADLINE) {
     return NextResponse.json({
@@ -209,23 +224,33 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   const ip = getClientIP(req);
   const ipRecord = ipUsageMap.get(ip);
-  
+  const remainingBudget = getRemainingBudget();
+
   return NextResponse.json({
-    global: {
+    // 服务状态
+    service: {
+      closed: SERVICE_CLOSED || isServiceClosed || globalSpent >= GLOBAL_BUDGET_LIMIT,
+      manuallyClosed: SERVICE_CLOSED,
+      deadline: new Date(DEADLINE).toISOString(),
+      isExpired: Date.now() > DEADLINE
+    },
+    // 费用统计
+    cost: {
       spent: formatMoney(globalSpent),
       budget: formatMoney(GLOBAL_BUDGET_LIMIT),
-      remaining: formatMoney(getRemainingBudget()),
-      percentUsed: Math.min(100, (globalSpent / GLOBAL_BUDGET_LIMIT) * 100).toFixed(1),
-      isClosed: isServiceClosed || globalSpent >= GLOBAL_BUDGET_LIMIT
+      remaining: formatMoney(remainingBudget),
+      percentUsed: Math.min(100, (globalSpent / GLOBAL_BUDGET_LIMIT) * 100).toFixed(1)
     },
+    // 个人使用
     personal: {
       used: ipRecord?.count || 0,
       limit: MAX_CUSTOM_QUESTIONS,
       remaining: Math.max(0, MAX_CUSTOM_QUESTIONS - (ipRecord?.count || 0))
     },
-    deadline: {
-      date: new Date(DEADLINE).toISOString(),
-      isExpired: Date.now() > DEADLINE
+    // 说明
+    instructions: {
+      howToClose: "在 Vercel 环境变量中设置 SERVICE_CLOSED=true 即可关闭服务",
+      howToCheck: "访问 /api/chat 查看详细状态"
     }
   });
 }
