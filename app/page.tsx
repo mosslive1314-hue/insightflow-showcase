@@ -542,7 +542,22 @@ Vibe Coding：
 
       if (!response.ok) {
         const errorText = await response.text()
-        console.error('API Error Response:', errorText)
+        console.error('=== API HTTP 错误 ===')
+        console.error('状态码:', response.status)
+        console.error('错误内容:', errorText)
+
+        // 尝试解析错误响应（可能是 400 状态码但 body 包含错误消息）
+        try {
+          const errorData = JSON.parse(errorText)
+          if (errorData.choices && errorData.choices[0] && errorData.choices[0].message) {
+            console.log('从错误响应中提取消息:', errorData.choices[0].message.content)
+            return errorData.choices[0].message.content
+          }
+        } catch (e) {
+          console.log('无法解析错误响应为 JSON')
+        }
+
+        console.log('====================')
         throw new Error(`API 错误: ${response.status}`)
       }
 
